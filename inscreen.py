@@ -18,6 +18,8 @@ logging.basicConfig(
 master_group_titles_with_photos = {}
 group_titles_with_photos = {}
 
+safe_mode = True
+
 
 def nofollow(update, context):
     global group_titles_with_photos
@@ -33,6 +35,8 @@ def nofollow(update, context):
         if current_title not in group_titles_with_photos:
             message = "Mag send po muna kayo ng picture."
             context.bot.send_message(chat_id=current_id, text=message)
+            if(safe_mode):
+                time.sleep(4)
             return
         time_template = timestamp.strftime("(%b %d, %Y) %A\n%I:%M:%S %p\n")
         photo_count = len(group_titles_with_photos[current_title])
@@ -40,6 +44,8 @@ def nofollow(update, context):
         message += f"Forwarding {photo_count} screenshots.\n"
         message += "Please wait..."
         context.bot.send_message(chat_id=current_id, text=message)
+        if(safe_mode):
+            time.sleep(4)
         photo_group = []
         for counter in range(photo_count):
             photo_group += [group_titles_with_photos[current_title].pop(0)]
@@ -54,17 +60,20 @@ def nofollow(update, context):
                 photo_group = []
                 time.sleep(30)
         context.bot.send_media_group(chat_id=target_id, media=photo_group)
+        if(safe_mode):
+            time.sleep(4 * len(photo_group))
         message = f"{photo_count} screenshot/s forwared."
         group_titles_with_photos.pop(current_title)
         context.bot.send_message(chat_id=current_id, text=message)
-        return
+        if(safe_mode):
+            time.sleep(4)
 
 
 def info(update, context):
     global group_titles_with_photos
     global master_group_titles_with_photos
     current_id = str(update.effective_chat.id)
-    target_id = config.target_id[1]
+    target_id = config.target_id[0]
     group_ids = config.group_ids
     group_titles = config.group_titles
     timestamp = datetime.datetime.now()
@@ -72,6 +81,8 @@ def info(update, context):
         if len(master_group_titles_with_photos) == 0:
             message = "Wala pa pong nagpasa.\n"
             context.bot.send_message(chat_id=current_id, text=message)
+            if(safe_mode):
+                time.sleep(4)
             return
         if len(master_group_titles_with_photos) != len(group_ids):
             groups_no_photo = sorted(
@@ -83,6 +94,8 @@ def info(update, context):
             for group in groups_no_photo:
                 message += group
             context.bot.send_message(chat_id=current_id, text=message)
+            if(safe_mode):
+                time.sleep(4)
         time_template = timestamp.strftime("(%b %d, %Y) %A\n\n")
         message = "CFO Today Screenshots\n"
         message += time_template
@@ -99,6 +112,8 @@ def info(update, context):
         total_percentage = math.ceil((total_photo_count / total_snumber) * 100)
         message += f"\nKabuuan = {total_percentage}% - {total_photo_count:,} views"
         context.bot.send_message(chat_id=current_id, text=message)
+        if(safe_mode):
+            time.sleep(4)
         return
     if current_id in group_ids:
         current_title = update.effective_chat.title
@@ -126,6 +141,8 @@ def info(update, context):
             master_percentage = math.ceil((master_photo_count / snumber) * 100)
             message += f"Bilang ng na i-forward: {master_photo_count}\nPorsyento ng na i-forward: {master_percentage}%"
         context.bot.send_message(chat_id=current_id, text=message)
+        if(safe_mode):
+            time.sleep(4)
 
 
 def help(update, context):
@@ -148,6 +165,8 @@ def clear(update, context):
         master_group_titles_with_photos = {}
         message = "Cleared all queries."
         context.bot.send_message(chat_id=current_id, text=message)
+        if(safe_mode):
+            time.sleep(4)
         return
     if current_id in group_ids:
         current_title = update.effective_chat.title
@@ -158,7 +177,8 @@ def clear(update, context):
         else:
             message += "Query is already empty."
         context.bot.send_message(chat_id=current_id, text=message)
-        return
+        if(safe_mode):
+            time.sleep(4)
 
 
 # def received_text(update, context):
