@@ -101,7 +101,7 @@ def info(update, context):
         message += time_template
         total_photo_count = 0
         total_snumber = 0
-        for idx, purok in enumerate(master_group_titles_with_photos):
+        for idx, purok in enumerate(sorted(master_group_titles_with_photos)):
             purok_number = idx + 1
             photo_count = len(master_group_titles_with_photos[purok])
             total_photo_count += photo_count
