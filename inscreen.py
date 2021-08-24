@@ -126,7 +126,7 @@ def info(update, context):
         if current_title in group_titles_with_photos and current_title in master_group_titles_with_photos:
             message += "Meron na po kayong na i-send at na i-forward.\n\n"
         if current_title not in group_titles_with_photos and current_title not in master_group_titles_with_photos:
-            message += "Wala pa po kayong na i-send na picture at na i-forward.\n\n"
+            message += "Wala pa po kayong na i-send at na i-forward.\n\n"
         if current_title in group_titles_with_photos and current_title not in master_group_titles_with_photos:
             message += "Meron na po kayong na i-send, pero wala pa po kayong na i-forward.\n\n"
         if current_title not in group_titles_with_photos and current_title in master_group_titles_with_photos:
