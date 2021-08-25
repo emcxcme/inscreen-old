@@ -14,8 +14,8 @@ config = helper.parse_config(config_filename)
 TOKEN = config.token[0]
 PORT = int(os.environ.get("PORT", "8443"))
 
-bot = telegram.Bot(token=TOKEN)
-bot.setWebhook("https://morning-harbor-80510.herokuapp.com/"+TOKEN)
+# bot = telegram.Bot(token=TOKEN)
+# bot.setWebhook("https://morning-harbor-80510.herokuapp.com/"+TOKEN)
 
 updater = Updater(token=TOKEN, use_context=True)
 dispatcher = updater.dispatcher
@@ -29,6 +29,7 @@ group_titles_with_photos = {}
 with open("data.pkl", "rb") as file:
     master_group_titles_with_photos, group_titles_with_photos = pickle.load(
         file)
+time.sleep(5)
 
 safe_mode = True
 
@@ -117,11 +118,12 @@ def info(update, context):
         message += time_template
         total_photo_count = 0
         total_snumber = 0
-        for idx, purok in enumerate(sorted(master_group_titles_with_photos)):
-            purok_number = idx + 1
+        for purok in sorted(master_group_titles_with_photos):
+            purok_number = int(purok.split("_")[2])
             photo_count = len(master_group_titles_with_photos[purok])
             total_photo_count += photo_count
-            snumber = int(config.group_snumbers[idx])
+            snumber_index = purok_number - 1
+            snumber = int(config.group_snumbers[snumber_index])
             total_snumber += snumber
             percentage = math.ceil((photo_count / snumber) * 100)
             message += f"PUROK {purok_number} - {percentage}% ({photo_count})\n"
@@ -255,8 +257,8 @@ dispatcher.add_handler(received_photo_handler)
 # received_text_handler = MessageHandler(Filters.text, received_text)
 # dispatcher.add_handler(received_text_handler)
 
-# updater.start_polling()
+updater.start_polling()
 
-updater.start_webhook(listen="0.0.0.0", port=PORT,
-                      url_path=TOKEN, webhook_url="https://morning-harbor-80510.herokuapp.com/"+TOKEN)
-updater.idle()
+# updater.start_webhook(listen="0.0.0.0", port=PORT,
+#                       url_path=TOKEN, webhook_url="https://morning-harbor-80510.herokuapp.com/"+TOKEN)
+# updater.idle()
