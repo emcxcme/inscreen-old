@@ -2,12 +2,18 @@ import datetime
 import helper
 import logging
 import math
+import os
+import telegram
 import time
 from telegram.ext import CommandHandler, Filters, MessageHandler, Updater
 from telegram.files.inputmedia import InputMediaPhoto
 
 config_filename = "inscreen_config.txt"
 config = helper.parse_config(config_filename)
+
+PORT = int(os.environ.get("PORT", "5000"))
+bot = telegram.Bot(token=config.token[0])
+bot.setWebhook("https://morning-harbor-80510.herokuapp.com/"+config.token[0])
 
 updater = Updater(token=config.token[0], use_context=True)
 dispatcher = updater.dispatcher
@@ -226,4 +232,9 @@ dispatcher.add_handler(received_photo_handler)
 # received_text_handler = MessageHandler(Filters.text, received_text)
 # dispatcher.add_handler(received_text_handler)
 
-updater.start_polling()
+# updater.start_polling()
+
+updater.start_webhook(listen="0.0.0.0", port=PORT, url_path=config.token[0])
+updater.bot.setWebhook(
+    "https://morning-harbor-80510.herokuapp.com/"+config.token[0])
+updater.idle()
