@@ -34,6 +34,7 @@ safe_mode = True
 
 
 def nofollow(update, context):
+    global master_group_titles_with_photos
     global group_titles_with_photos
     current_id = str(update.effective_chat.id)
     target_id = config.target_id[0]
@@ -213,6 +214,7 @@ def clear(update, context):
 
 
 def received_photo(update, context):
+    global master_group_titles_with_photos
     global group_titles_with_photos
     current_id = str(update.effective_chat.id)
     target_id = config.target_id[0]
