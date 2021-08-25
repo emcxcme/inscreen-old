@@ -1,5 +1,6 @@
 import datetime
 import helper
+import pickle
 import logging
 import math
 import os
@@ -10,12 +11,13 @@ from telegram.files.inputmedia import InputMediaPhoto
 
 config_filename = "inscreen_config.txt"
 config = helper.parse_config(config_filename)
-
+TOKEN = config.token[0]
 PORT = int(os.environ.get("PORT", "8443"))
-bot = telegram.Bot(token=config.token[0])
-bot.setWebhook("https://morning-harbor-80510.herokuapp.com/"+config.token[0])
 
-updater = Updater(token=config.token[0], use_context=True)
+bot = telegram.Bot(token=TOKEN)
+bot.setWebhook("https://morning-harbor-80510.herokuapp.com/"+TOKEN)
+
+updater = Updater(token=TOKEN, use_context=True)
 dispatcher = updater.dispatcher
 
 logging.basicConfig(
@@ -23,6 +25,10 @@ logging.basicConfig(
 
 master_group_titles_with_photos = {}
 group_titles_with_photos = {}
+
+with open("data.pkl", "rb") as file:
+    master_group_titles_with_photos, group_titles_with_photos = pickle.load(
+        file)
 
 safe_mode = True
 
@@ -71,6 +77,9 @@ def nofollow(update, context):
         message = f"{photo_count} screenshot/s forwared."
         group_titles_with_photos.pop(current_title)
         context.bot.send_message(chat_id=current_id, text=message)
+        with open("data.pkl", "wb") as file:
+            pickle.dump([master_group_titles_with_photos,
+                        group_titles_with_photos], file)
         if(safe_mode):
             time.sleep(4)
 
@@ -171,6 +180,9 @@ def clear(update, context):
         master_group_titles_with_photos = {}
         message = "Cleared all queries."
         context.bot.send_message(chat_id=current_id, text=message)
+        with open("data.pkl", "wb") as file:
+            pickle.dump([master_group_titles_with_photos,
+                        group_titles_with_photos], file)
         if(safe_mode):
             time.sleep(4)
         return
@@ -183,6 +195,9 @@ def clear(update, context):
         else:
             message += "Query is already empty."
         context.bot.send_message(chat_id=current_id, text=message)
+        with open("data.pkl", "wb") as file:
+            pickle.dump([master_group_titles_with_photos,
+                        group_titles_with_photos], file)
         if(safe_mode):
             time.sleep(4)
 
@@ -210,8 +225,14 @@ def received_photo(update, context):
         current_photo = InputMediaPhoto(update.message.photo[-1])
         if current_title in group_titles_with_photos:
             group_titles_with_photos[current_title].append(current_photo)
+            with open("data.pkl", "wb") as file:
+                pickle.dump([master_group_titles_with_photos,
+                            group_titles_with_photos], file)
             return
         group_titles_with_photos[current_title] = [current_photo]
+        with open("data.pkl", "wb") as file:
+            pickle.dump([master_group_titles_with_photos,
+                        group_titles_with_photos], file)
 
 
 nofollow_handler = CommandHandler("nofollow", nofollow)
@@ -235,5 +256,5 @@ dispatcher.add_handler(received_photo_handler)
 # updater.start_polling()
 
 updater.start_webhook(listen="0.0.0.0", port=PORT,
-                      url_path=config.token[0], webhook_url="https://morning-harbor-80510.herokuapp.com/"+config.token[0])
+                      url_path=TOKEN, webhook_url="https://morning-harbor-80510.herokuapp.com/"+TOKEN)
 updater.idle()
