@@ -11,7 +11,7 @@ from telegram.files.inputmedia import InputMediaPhoto
 config_filename = "inscreen_config.txt"
 config = helper.parse_config(config_filename)
 
-PORT = int(os.environ.get("PORT", "443"))
+PORT = int(os.environ.get("PORT", "5000"))
 bot = telegram.Bot(token=config.token[0])
 bot.setWebhook("https://morning-harbor-80510.herokuapp.com/"+config.token[0])
 
