@@ -11,7 +11,7 @@ from telegram.files.inputmedia import InputMediaPhoto
 config_filename = "inscreen_config.txt"
 config = helper.parse_config(config_filename)
 
-PORT = int(os.environ.get("PORT", "5000"))
+PORT = int(os.environ.get("PORT", "8443"))
 bot = telegram.Bot(token=config.token[0])
 bot.setWebhook("https://morning-harbor-80510.herokuapp.com/"+config.token[0])
 
@@ -234,7 +234,6 @@ dispatcher.add_handler(received_photo_handler)
 
 # updater.start_polling()
 
-updater.start_webhook(listen="0.0.0.0", port=PORT, url_path=config.token[0])
-updater.bot.setWebhook(
-    "https://morning-harbor-80510.herokuapp.com/"+config.token[0])
+updater.start_webhook(listen="0.0.0.0", port=PORT,
+                      url_path=config.token[0], webhook_url="https://morning-harbor-80510.herokuapp.com/"+config.token[0])
 updater.idle()
