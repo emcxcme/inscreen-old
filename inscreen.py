@@ -130,7 +130,11 @@ def info(update, context):
             snumber_index = purok_number - 1
             snumber = int(config.group_snumbers[snumber_index])
             percentage = math.ceil((photo_count / snumber) * 100)
-            rankable[percentage] = [purok, photo_count]
+            if percentage in rankable:
+                rankable[percentage] = [
+                    f"{rankable[percentage][0]} & {purok_number}", f"{rankable[percentage][1]} & {photo_count}"]
+            else:
+                rankable[percentage] = [purok, photo_count]
             message += f"PUROK {purok_number} - {percentage}% ({photo_count})\n"
         total_percentage = math.ceil((total_photo_count / total_snumber) * 100)
         message += f"\nKabuuan = {total_percentage}% - {total_photo_count:,} views"
@@ -139,11 +143,12 @@ def info(update, context):
             time.sleep(4)
         message = "CFO Today Leaderboards\n"
         message += time_template
-        for idx, percentage in enumerate(sorted(rankable)):
+        for idx, percentage in enumerate(sorted(rankable, reverse=True)):
             rank_number = idx + 1
             photo_count = rankable[percentage][1]
             purok_number = rankable[percentage][0].split("_")[2]
-            message += f"{rank_number}) PUROK {purok_number} - {percentage}% ({photo_count})"
+            message += f"{rank_number}) PUROK {purok_number} - {percentage}% ({photo_count})\n"
+        message += f"\nKabuuan = {total_percentage}% - {total_photo_count:,} views"
         context.bot.send_message(chat_id=current_id, text=message)
         if(safe_mode):
             time.sleep(4)
