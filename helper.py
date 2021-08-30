@@ -1,3 +1,7 @@
+import data
+import pickle
+
+
 class Configuration:
     def __init__(self, token, target_id, group_ids, group_descriptions, group_titles, group_snumbers):
         self.token = token
@@ -40,3 +44,15 @@ def parse_config(filename):
         ":")[1] for group_description in group_descriptions]
 
     return Configuration(token, target_id, group_ids, group_descriptions, group_titles, group_snumbers)
+
+
+def save():
+    with open("data.pkl", "wb") as file:
+        pickle.dump([data.master_group_titles_with_photo_ids,
+                    data.group_titles_with_photo_ids], file, protocol=pickle.HIGHEST_PROTOCOL)
+
+
+def load():
+    with open("data.pkl", "rb") as file:
+        data.master_group_titles_with_photo_ids, data.group_titles_with_photo_ids = pickle.load(
+            file)
