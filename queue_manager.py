@@ -40,7 +40,7 @@ class QueueManager:
         return self.holder.token
 
     def dequeue(self):
-        current_time_in_seconds = math.ceil(
+        current_time_in_seconds = math.floor(
             datetime.datetime.today().timestamp())
         self.holder.time = current_time_in_seconds
         self.holder = self.holder.next
