@@ -4,6 +4,8 @@ import datetime
 import helper
 import math
 import time
+import queue_manager
+from telegram.ext import Updater
 from telegram.files.inputmedia import InputMediaPhoto
 
 
@@ -14,6 +16,7 @@ class Callback:
         self.group_ids = config.group_ids
         self.group_titles = config.group_titles
         self.group_snumbers = config.group_snumbers
+        self.qm = queue_manager.QueueManager(config.token[1:])
 
     def nofollow(self, update, context):
         current_id = str(update.effective_chat.id)
@@ -61,9 +64,13 @@ class Callback:
 
                     media_photos = list(map(InputMediaPhoto, photo_ids))
 
-                    context.bot.send_media_group(
+                    # context.bot.send_media_group(
+                    #     chat_id=self.target_group_id, media=media_photos)
+                    # time.sleep(constants.TIME_LIMIT * len(photo_ids))
+
+                    Updater(token=self.qm.get_available_bot_token()).bot.send_media_group(
                         chat_id=self.target_group_id, media=media_photos)
-                    time.sleep(constants.TIME_LIMIT * len(photo_ids))
+                    self.qm.dequeue()
 
                     photo_ids = []
                     media_photos = []
@@ -76,9 +83,9 @@ class Callback:
 
                 media_photos = list(map(InputMediaPhoto, photo_ids))
 
-                context.bot.send_media_group(
+                Updater(token=self.qm.get_available_bot_token()).bot.send_media_group(
                     chat_id=self.target_group_id, media=media_photos)
-                time.sleep(constants.TIME_LIMIT * len(photo_ids))
+                self.qm.dequeue()
 
             data.group_titles_with_photo_ids.pop(current_title)
 
@@ -193,6 +200,7 @@ class Callback:
                     current_title)
             snumber = int(self.group_snumbers[current_group_index])
 
+            photo_count = 0
             if current_title in data.group_titles_with_photo_ids:
                 photo_count = len(
                     data.group_titles_with_photo_ids[current_title])
@@ -200,13 +208,21 @@ class Callback:
 
                 message += f"Bilang ng na i-send: {photo_count}\nPorsyento ng na i-send: {percentage}%\n"
 
+            master_photo_count = 0
             if current_title in data.master_group_titles_with_photo_ids:
                 master_photo_count = len(
                     data.master_group_titles_with_photo_ids[current_title])
                 master_percentage = math.ceil(
                     (master_photo_count / snumber) * 100)
 
-                message += f"Bilang ng na i-forward: {master_photo_count}\nPorsyento ng na i-forward: {master_percentage}%"
+                message += f"Bilang ng na i-forward: {master_photo_count}\nPorsyento ng na i-forward: {master_percentage}%\n"
+
+            total_photo_count = photo_count + master_photo_count
+            total_percentage = math.ceil(
+                (total_photo_count / snumber) * 100)
+
+            if current_title in data.group_titles_with_photo_ids and current_title in data.master_group_titles_with_photo_ids:
+                message += f"Kabuuang bilang: {total_photo_count}\nKabuuang porsyento: {total_percentage}%"
 
             context.bot.send_message(chat_id=current_id, text=message)
             time.sleep(constants.TIME_LIMIT)
