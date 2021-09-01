@@ -1,3 +1,4 @@
+from telegram import forcereply
 import constants
 import data
 import datetime
@@ -7,6 +8,8 @@ import time
 import queue_manager
 from telegram.ext import Updater
 from telegram.files.inputmedia import InputMediaPhoto
+from telegram.keyboardbutton import KeyboardButton
+from telegram.replykeyboardmarkup import ReplyKeyboardMarkup
 
 
 class Callback:
@@ -31,11 +34,23 @@ class Callback:
 
         if current_id in self.group_ids:
             current_title = update.effective_chat.title
+            keyboard = [
+                [KeyboardButton("/nofollow"), KeyboardButton("/info")],
+                [KeyboardButton("/clear"), KeyboardButton("/help")]
+            ]
+            markup = ReplyKeyboardMarkup(keyboard)
 
             if current_title not in data.group_titles_with_photo_ids:
                 message = "Mag send po muna kayo ng picture."
 
-                context.bot.send_message(chat_id=current_id, text=message)
+                context.bot.send_message(
+                    chat_id=current_id, text=message)
+                time.sleep(constants.TIME_LIMIT)
+
+                message = "Ano pa pong maipaglilingkod ko?"
+
+                context.bot.send_message(
+                    chat_id=current_id, text=message, reply_markup=markup)
                 time.sleep(constants.TIME_LIMIT)
 
                 return
@@ -64,10 +79,6 @@ class Callback:
 
                     media_photos = list(map(InputMediaPhoto, photo_ids))
 
-                    # context.bot.send_media_group(
-                    #     chat_id=self.target_group_id, media=media_photos)
-                    # time.sleep(constants.TIME_LIMIT * len(photo_ids))
-
                     Updater(token=self.qm.get_available_bot_token()).bot.send_media_group(
                         chat_id=self.target_group_id, media=media_photos)
                     self.qm.dequeue()
@@ -91,7 +102,14 @@ class Callback:
 
             message = f"{photo_count} screenshot/s forwared."
 
-            context.bot.send_message(chat_id=current_id, text=message)
+            context.bot.send_message(
+                chat_id=current_id, text=message)
+            time.sleep(constants.TIME_LIMIT)
+
+            message = "Ano pa pong maipaglilingkod ko?"
+
+            context.bot.send_message(
+                chat_id=current_id, text=message, reply_markup=markup)
             time.sleep(constants.TIME_LIMIT)
 
             helper.save()
@@ -104,10 +122,22 @@ class Callback:
             return
 
         if current_id == self.target_group_id:
+            keyboard = [
+                [KeyboardButton("/info"), KeyboardButton("/clear")]
+            ]
+            markup = ReplyKeyboardMarkup(keyboard)
+
             if len(data.master_group_titles_with_photo_ids) == 0:
                 message = "Wala pa pong nagpasa.\n"
 
-                context.bot.send_message(chat_id=current_id, text=message)
+                context.bot.send_message(
+                    chat_id=current_id, text=message)
+                time.sleep(constants.TIME_LIMIT)
+
+                message = "Ano pa pong maipaglilingkod ko?"
+
+                context.bot.send_message(
+                    chat_id=current_id, text=message, reply_markup=markup)
                 time.sleep(constants.TIME_LIMIT)
 
                 return
@@ -172,13 +202,25 @@ class Callback:
                 message += f"{rank_number}) PUROK {purok_number} - {percentage}% ({photo_count})\n"
             message += f"\nKabuuan = {total_percentage}% - {total_photo_count:,} views"
 
-            context.bot.send_message(chat_id=current_id, text=message)
+            context.bot.send_message(
+                chat_id=current_id, text=message)
+            time.sleep(constants.TIME_LIMIT)
+
+            message = "Ano pa pong maipaglilingkod ko?"
+
+            context.bot.send_message(
+                chat_id=current_id, text=message, reply_markup=markup)
             time.sleep(constants.TIME_LIMIT)
 
             return
 
         if current_id in self.group_ids:
             current_title = update.effective_chat.title
+            keyboard = [
+                [KeyboardButton("/nofollow"), KeyboardButton("/info")],
+                [KeyboardButton("/clear"), KeyboardButton("/help")]
+            ]
+            markup = ReplyKeyboardMarkup(keyboard)
 
             timestamp = datetime.datetime.now()
             time_template = timestamp.strftime("(%b %d, %Y) %A\n\n")
@@ -206,7 +248,7 @@ class Callback:
                     data.group_titles_with_photo_ids[current_title])
                 percentage = math.ceil((photo_count / snumber) * 100)
 
-                message += f"Bilang ng na i-send: {photo_count}\nPorsyento ng na i-send: {percentage}%\n"
+                message += f"Bilang ng na i-send: {photo_count}\nPorsyento ng na i-send: {percentage}%\n\n"
 
             master_photo_count = 0
             if current_title in data.master_group_titles_with_photo_ids:
@@ -215,7 +257,7 @@ class Callback:
                 master_percentage = math.ceil(
                     (master_photo_count / snumber) * 100)
 
-                message += f"Bilang ng na i-forward: {master_photo_count}\nPorsyento ng na i-forward: {master_percentage}%\n"
+                message += f"Bilang ng na i-forward: {master_photo_count}\nPorsyento ng na i-forward: {master_percentage}%\n\n"
 
             total_photo_count = photo_count + master_photo_count
             total_percentage = math.ceil(
@@ -224,7 +266,14 @@ class Callback:
             if current_title in data.group_titles_with_photo_ids and current_title in data.master_group_titles_with_photo_ids:
                 message += f"Kabuuang bilang: {total_photo_count}\nKabuuang porsyento: {total_percentage}%"
 
-            context.bot.send_message(chat_id=current_id, text=message)
+            context.bot.send_message(
+                chat_id=current_id, text=message)
+            time.sleep(constants.TIME_LIMIT)
+
+            message = "Ano pa pong maipaglilingkod ko?"
+
+            context.bot.send_message(
+                chat_id=current_id, text=message, reply_markup=markup)
             time.sleep(constants.TIME_LIMIT)
 
     def clear(self, update, context):
@@ -235,11 +284,25 @@ class Callback:
             return
 
         if current_id == self.target_group_id:
-            data.master_group_titles_with_photo_ids = {}
+            keyboard = [
+                [KeyboardButton("/info"), KeyboardButton("/clear")]
+            ]
+            markup = ReplyKeyboardMarkup(keyboard)
 
-            message = "Cleared all queries."
+            # data.master_group_titles_with_photo_ids = {}
 
-            context.bot.send_message(chat_id=current_id, text=message)
+            # message = "Cleared all queries."
+
+            message = "Disabled."
+
+            context.bot.send_message(
+                chat_id=current_id, text=message)
+            time.sleep(constants.TIME_LIMIT)
+
+            message = "Ano pa pong maipaglilingkod ko?"
+
+            context.bot.send_message(
+                chat_id=current_id, text=message, reply_markup=markup)
             time.sleep(constants.TIME_LIMIT)
 
             helper.save()
@@ -248,8 +311,12 @@ class Callback:
 
         if current_id in self.group_ids:
             current_title = update.effective_chat.title
-
             message = ""
+            keyboard = [
+                [KeyboardButton("/nofollow"), KeyboardButton("/info")],
+                [KeyboardButton("/clear"), KeyboardButton("/help")]
+            ]
+            markup = ReplyKeyboardMarkup(keyboard)
 
             if current_title in data.group_titles_with_photo_ids:
                 data.group_titles_with_photo_ids.pop(current_title)
@@ -258,7 +325,14 @@ class Callback:
             else:
                 message += "Query is already empty."
 
-            context.bot.send_message(chat_id=current_id, text=message)
+            context.bot.send_message(
+                chat_id=current_id, text=message)
+            time.sleep(constants.TIME_LIMIT)
+
+            message = "Ano pa pong maipaglilingkod ko?"
+
+            context.bot.send_message(
+                chat_id=current_id, text=message, reply_markup=markup)
             time.sleep(constants.TIME_LIMIT)
 
             helper.save()
@@ -302,8 +376,20 @@ Tiyakin lamang na screenshot po ang nai-send at maino-/nofollow. Ngunit kung kay
 
 Salamat po!
 """
+            keyboard = [
+                [KeyboardButton("/nofollow"), KeyboardButton("/info")],
+                [KeyboardButton("/clear"), KeyboardButton("/help")]
+            ]
+            markup = ReplyKeyboardMarkup(keyboard)
 
-            context.bot.send_message(chat_id=current_id, text=message)
+            context.bot.send_message(
+                chat_id=current_id, text=message)
+            time.sleep(constants.TIME_LIMIT)
+
+            message = "Ano pa pong maipaglilingkod ko?"
+
+            context.bot.send_message(
+                chat_id=current_id, text=message, reply_markup=markup)
             time.sleep(constants.TIME_LIMIT)
 
     def received_photo(self, update, context):
