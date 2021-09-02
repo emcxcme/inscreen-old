@@ -1,4 +1,3 @@
-from telegram import forcereply
 import constants
 import data
 import datetime
@@ -6,6 +5,7 @@ import helper
 import math
 import time
 import queue_manager
+from telegram.error import BadRequest
 from telegram.ext import Updater
 from telegram.files.inputmedia import InputMediaPhoto
 from telegram.keyboardbutton import KeyboardButton
@@ -45,13 +45,12 @@ class Callback:
 
                 context.bot.send_message(
                     chat_id=current_id, text=message)
-                time.sleep(constants.TIME_LIMIT)
 
                 message = "Ano pa pong maipaglilingkod ko?"
 
                 context.bot.send_message(
                     chat_id=current_id, text=message, reply_markup=markup)
-                time.sleep(constants.TIME_LIMIT)
+                time.sleep(constants.TIME_LIMIT * 2)
 
                 return
 
@@ -67,50 +66,78 @@ class Callback:
             time.sleep(constants.TIME_LIMIT)
 
             photo_ids = []
-            for counter in range(photo_count):
+            while len(data.group_titles_with_photo_ids[current_title]):
                 photo_ids += [
                     data.group_titles_with_photo_ids[current_title].pop(0)]
 
                 if len(photo_ids) == 10:
+                    media_photos = list(map(InputMediaPhoto, photo_ids))
+
+                    try:
+                        Updater(token=self.qm.get_available_bot_token()).bot.send_media_group(
+                            chat_id=self.target_group_id, media=media_photos)
+                        self.qm.dequeue()
+
+                        if current_title not in data.master_group_titles_with_photo_ids:
+                            data.master_group_titles_with_photo_ids[current_title] = photo_ids
+                        else:
+                            data.master_group_titles_with_photo_ids[current_title] += photo_ids
+
+                        photo_ids = []
+                    except BadRequest as e:
+                        print(e)
+
+                        data.group_titles_with_photo_ids[current_title].extend(
+                            photo_ids)
+
+                        self.qm.dequeue()
+
+                        photo_ids = []
+
+            while photo_ids:
+                media_photos = list(map(InputMediaPhoto, photo_ids))
+
+                try:
+                    Updater(token=self.qm.get_available_bot_token()).bot.send_media_group(
+                        chat_id=self.target_group_id, media=media_photos)
+                    self.qm.dequeue()
+
                     if current_title not in data.master_group_titles_with_photo_ids:
                         data.master_group_titles_with_photo_ids[current_title] = photo_ids
                     else:
                         data.master_group_titles_with_photo_ids[current_title] += photo_ids
 
-                    media_photos = list(map(InputMediaPhoto, photo_ids))
-
-                    Updater(token=self.qm.get_available_bot_token()).bot.send_media_group(
-                        chat_id=self.target_group_id, media=media_photos)
-                    self.qm.dequeue()
-
                     photo_ids = []
-                    media_photos = []
+                except BadRequest as e:
+                    print(e)
 
-            if photo_ids != []:
-                if current_title not in data.master_group_titles_with_photo_ids:
-                    data.master_group_titles_with_photo_ids[current_title] = photo_ids
-                else:
-                    data.master_group_titles_with_photo_ids[current_title] += photo_ids
-
-                media_photos = list(map(InputMediaPhoto, photo_ids))
-
-                Updater(token=self.qm.get_available_bot_token()).bot.send_media_group(
-                    chat_id=self.target_group_id, media=media_photos)
-                self.qm.dequeue()
+                    self.qm.dequeue()
 
             data.group_titles_with_photo_ids.pop(current_title)
 
-            message = f"{photo_count} screenshot/s forwared."
+            message = f"{photo_count} screenshot/s forwared.\n\n"
+
+            if current_title in data.group_titles_with_duplicate_photo_unique_id_count:
+                duplicate_count = data.group_titles_with_duplicate_photo_unique_id_count[
+                    current_title]
+
+                message += f"{duplicate_count} duplicate files were detected thus ignored!!!" if duplicate_count > 1 else f"{duplicate_count} duplicate file was detected thus ignored!!!"
+
+                data.master_photo_unique_ids |= {
+                    *data.group_titles_with_photo_unique_ids[current_title]}
+
+                data.group_titles_with_photo_unique_ids.pop(current_title)
+                data.group_titles_with_duplicate_photo_unique_id_count.pop(
+                    current_title)
 
             context.bot.send_message(
                 chat_id=current_id, text=message)
-            time.sleep(constants.TIME_LIMIT)
 
             message = "Ano pa pong maipaglilingkod ko?"
 
             context.bot.send_message(
                 chat_id=current_id, text=message, reply_markup=markup)
-            time.sleep(constants.TIME_LIMIT)
+            time.sleep(constants.TIME_LIMIT * 2)
 
             helper.save()
 
@@ -132,13 +159,12 @@ class Callback:
 
                 context.bot.send_message(
                     chat_id=current_id, text=message)
-                time.sleep(constants.TIME_LIMIT)
 
                 message = "Ano pa pong maipaglilingkod ko?"
 
                 context.bot.send_message(
                     chat_id=current_id, text=message, reply_markup=markup)
-                time.sleep(constants.TIME_LIMIT)
+                time.sleep(constants.TIME_LIMIT * 2)
 
                 return
 
@@ -204,13 +230,12 @@ class Callback:
 
             context.bot.send_message(
                 chat_id=current_id, text=message)
-            time.sleep(constants.TIME_LIMIT)
 
             message = "Ano pa pong maipaglilingkod ko?"
 
             context.bot.send_message(
                 chat_id=current_id, text=message, reply_markup=markup)
-            time.sleep(constants.TIME_LIMIT)
+            time.sleep(constants.TIME_LIMIT * 2)
 
             return
 
@@ -264,17 +289,22 @@ class Callback:
                 (total_photo_count / snumber) * 100)
 
             if current_title in data.group_titles_with_photo_ids and current_title in data.master_group_titles_with_photo_ids:
-                message += f"Kabuuang bilang: {total_photo_count}\nKabuuang porsyento: {total_percentage}%"
+                message += f"Kabuuang bilang: {total_photo_count}\nKabuuang porsyento: {total_percentage}%\n\n"
+
+            if current_title in data.group_titles_with_duplicate_photo_unique_id_count:
+                duplicate_count = data.group_titles_with_duplicate_photo_unique_id_count[
+                    current_title]
+
+                message += f"{duplicate_count} duplicate files were detected thus ignored!!!" if duplicate_count > 1 else f"{duplicate_count} duplicate file was detected thus ignored!!!"
 
             context.bot.send_message(
                 chat_id=current_id, text=message)
-            time.sleep(constants.TIME_LIMIT)
 
             message = "Ano pa pong maipaglilingkod ko?"
 
             context.bot.send_message(
                 chat_id=current_id, text=message, reply_markup=markup)
-            time.sleep(constants.TIME_LIMIT)
+            time.sleep(constants.TIME_LIMIT * 2)
 
     def clear(self, update, context):
         current_id = str(update.effective_chat.id)
@@ -297,13 +327,12 @@ class Callback:
 
             context.bot.send_message(
                 chat_id=current_id, text=message)
-            time.sleep(constants.TIME_LIMIT)
 
             message = "Ano pa pong maipaglilingkod ko?"
 
             context.bot.send_message(
                 chat_id=current_id, text=message, reply_markup=markup)
-            time.sleep(constants.TIME_LIMIT)
+            time.sleep(constants.TIME_LIMIT * 2)
 
             helper.save()
 
@@ -318,6 +347,13 @@ class Callback:
             ]
             markup = ReplyKeyboardMarkup(keyboard)
 
+            if current_title in data.group_titles_with_photo_unique_ids:
+                data.group_titles_with_photo_unique_ids.pop(current_title)
+
+            if current_title in data.group_titles_with_duplicate_photo_unique_id_count:
+                data.group_titles_with_duplicate_photo_unique_id_count.pop(
+                    current_title)
+
             if current_title in data.group_titles_with_photo_ids:
                 data.group_titles_with_photo_ids.pop(current_title)
 
@@ -327,13 +363,12 @@ class Callback:
 
             context.bot.send_message(
                 chat_id=current_id, text=message)
-            time.sleep(constants.TIME_LIMIT)
 
             message = "Ano pa pong maipaglilingkod ko?"
 
             context.bot.send_message(
                 chat_id=current_id, text=message, reply_markup=markup)
-            time.sleep(constants.TIME_LIMIT)
+            time.sleep(constants.TIME_LIMIT * 2)
 
             helper.save()
 
@@ -384,13 +419,12 @@ Salamat po!
 
             context.bot.send_message(
                 chat_id=current_id, text=message)
-            time.sleep(constants.TIME_LIMIT)
 
             message = "Ano pa pong maipaglilingkod ko?"
 
             context.bot.send_message(
                 chat_id=current_id, text=message, reply_markup=markup)
-            time.sleep(constants.TIME_LIMIT)
+            time.sleep(constants.TIME_LIMIT * 2)
 
     def received_photo(self, update, context):
         current_id = str(update.effective_chat.id)
@@ -405,16 +439,40 @@ Salamat po!
 
         if current_id in self.group_ids:
             current_title = update.effective_chat.title
-            current_photo = update.message.photo[-1].file_id
+            current_photo_id = update.message.photo[-1].file_id
+            current_photo_unique_id = update.message.photo[-1].file_unique_id
+
+            if current_photo_unique_id in data.master_photo_unique_ids or current_title in data.group_titles_with_photo_unique_ids and current_photo_unique_id in data.group_titles_with_photo_unique_ids[current_title]:
+                message = "Duplicate has been found and ignored.\n"
+                message += f"File unique id: {current_photo_unique_id}"
+
+                print(message)
+
+                if current_title in data.group_titles_with_duplicate_photo_unique_id_count:
+                    data.group_titles_with_duplicate_photo_unique_id_count[current_title] += 1
+
+                    return
+
+                data.group_titles_with_duplicate_photo_unique_id_count[current_title] = 1
+
+                return
+
+            if current_title in data.group_titles_with_photo_unique_ids:
+                data.group_titles_with_photo_unique_ids[current_title] += [
+                    current_photo_unique_id]
+            else:
+                data.group_titles_with_photo_unique_ids[current_title] = [
+                    current_photo_unique_id]
 
             if current_title in data.group_titles_with_photo_ids:
-                data.group_titles_with_photo_ids[current_title].append(
-                    current_photo)
+                data.group_titles_with_photo_ids[current_title] += [
+                    current_photo_id]
 
                 helper.save()
 
                 return
 
-            data.group_titles_with_photo_ids[current_title] = [current_photo]
+            data.group_titles_with_photo_ids[current_title] = [
+                current_photo_id]
 
             helper.save()
