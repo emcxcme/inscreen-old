@@ -1,3 +1,4 @@
-*.bak
 inscreen_config.txt
+secrets.py
 *cache*
+*.bak

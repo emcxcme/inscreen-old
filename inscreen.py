@@ -11,9 +11,8 @@ logging.basicConfig(
 helper.load()
 
 updater = Updater(token=constants.TOKEN, use_context=True)
+# updater.bot.setWebhook(constants.URL + constants.TOKEN)
 dispatcher = updater.dispatcher
-
-# updater.bot.setWebhook(constants.URL + constants.TOKEN[0])
 
 
 def stop(update, context):

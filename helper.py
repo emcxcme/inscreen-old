@@ -1,5 +1,6 @@
 import data
 import pickle
+# import secrets
 
 
 class Configuration:
@@ -51,8 +52,38 @@ def save():
         pickle.dump([data.master_group_titles_with_photo_ids, data.master_photo_unique_ids, data.group_titles_with_photo_ids,
                     data.group_titles_with_photo_unique_ids, data.group_titles_with_duplicate_photo_unique_id_count], file, protocol=pickle.HIGHEST_PROTOCOL)
 
+# def save():
+#     client = boto3.client("s3", aws_access_key_id=secrets.access_key,
+#                           aws_secret_access_key=secrets.secret_access_key)
+#     bucket_name = "inscreen-bucket"
+#     object_name = "data.pkl"
+#     file_path = "/tmp/"
+#     file_name = "data.pkl"
+
+#     with open(file_path + file_name, "wb") as file:
+#         pickle.dump([data.master_group_titles_with_photo_ids, data.master_photo_unique_ids, data.group_titles_with_photo_ids,
+#                      data.group_titles_with_photo_unique_ids, data.group_titles_with_duplicate_photo_unique_id_count], file, protocol=pickle.HIGHEST_PROTOCOL)
+
+#     with open(file_path + file_name, "rb") as file:
+#         client.upload_fileobj(file, bucket_name, object_name)
+
 
 def load():
     with open("data.pkl", "rb") as file:
         data.master_group_titles_with_photo_ids, data.master_photo_unique_ids, data.group_titles_with_photo_ids, data.group_titles_with_photo_unique_ids, data.group_titles_with_duplicate_photo_unique_id_count = pickle.load(
             file)
+
+# def load():
+#     client = boto3.client("s3", aws_access_key_id=secrets.access_key,
+#                           aws_secret_access_key=secrets.secret_access_key)
+#     bucket_name = "inscreen-bucket"
+#     object_name = "data.pkl"
+#     file_path = "/tmp/"
+#     file_name = "data.pkl"
+
+#     with open(file_path + file_name, "wb") as file:
+#         client.download_fileobj(bucket_name, object_name, file)
+
+#     with open(file_path + file_name, "rb") as file:
+#         data.master_group_titles_with_photo_ids, data.master_photo_unique_ids, data.group_titles_with_photo_ids, data.group_titles_with_photo_unique_ids, data.group_titles_with_duplicate_photo_unique_id_count = pickle.load(
+#             file)

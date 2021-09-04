@@ -20,6 +20,7 @@ class Callback:
         self.group_titles = config.group_titles
         self.group_snumbers = config.group_snumbers
         self.qm = queue_manager.QueueManager(config.token[1:])
+        self.ismasterclearable = False
 
     def nofollow(self, update, context):
         current_id = str(update.effective_chat.id)
@@ -310,7 +311,10 @@ class Callback:
         current_id = str(update.effective_chat.id)
 
         if current_id == self.target_user_id:
-            # DO NOTHING
+            self.ismasterclearable = not self.ismasterclearable
+
+            print(f"Master clearable is set to {self.ismasterclearable}")
+
             return
 
         if current_id == self.target_group_id:
@@ -319,11 +323,14 @@ class Callback:
             ]
             markup = ReplyKeyboardMarkup(keyboard)
 
-            # data.master_group_titles_with_photo_ids = {}
-
-            # message = "Cleared all queries."
-
             message = "Disabled."
+
+            if self.ismasterclearable:
+                data.master_group_titles_with_photo_ids = {}
+
+                message = "Cleared all queries."
+
+            self.ismasterclearable = False
 
             context.bot.send_message(
                 chat_id=current_id, text=message)
