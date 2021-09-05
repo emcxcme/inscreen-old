@@ -64,7 +64,6 @@ class Callback:
             message += "Please wait..."
 
             context.bot.send_message(chat_id=current_id, text=message)
-            time.sleep(constants.TIME_LIMIT)
 
             photo_ids = []
             while len(data.group_titles_with_photo_ids[current_title]):
@@ -138,7 +137,7 @@ class Callback:
 
             context.bot.send_message(
                 chat_id=current_id, text=message, reply_markup=markup)
-            time.sleep(constants.TIME_LIMIT * 2)
+            time.sleep(constants.TIME_LIMIT * 3)
 
             helper.save()
 
@@ -182,7 +181,6 @@ class Callback:
                     message += purok
 
                 context.bot.send_message(chat_id=current_id, text=message)
-                time.sleep(constants.TIME_LIMIT)
 
             timestamp = datetime.datetime.now()
             time_template = timestamp.strftime("(%b %d, %Y) %A\n\n")
@@ -217,7 +215,6 @@ class Callback:
             message += f"\nKabuuan = {total_percentage}% - {total_photo_count:,} views"
 
             context.bot.send_message(chat_id=current_id, text=message)
-            time.sleep(constants.TIME_LIMIT)
 
             message = "CFO Today Leaderboards\n"
             message += time_template
@@ -236,7 +233,7 @@ class Callback:
 
             context.bot.send_message(
                 chat_id=current_id, text=message, reply_markup=markup)
-            time.sleep(constants.TIME_LIMIT * 2)
+            time.sleep(constants.TIME_LIMIT * 4)
 
             return
 
@@ -312,8 +309,9 @@ class Callback:
 
         if current_id == self.target_user_id:
             self.ismasterclearable = not self.ismasterclearable
+            message = f"Master clearable is set to {self.ismasterclearable}"
 
-            print(f"Master clearable is set to {self.ismasterclearable}")
+            print(message)
 
             return
 
@@ -397,7 +395,7 @@ Mga kapatid, ito po ang mga hakbang sa pag-send ng screenshot:
 1) Mag-send po ng mga screenshot.
 2) Pindutin po ang /nofollow.
 
-*Ang mga command ay makikita po sa pagpindot ng slash na naka kahon sa gilid po ng message bar.*
+*Ang mga command ay makikita po sa pagpindot ng kahon sa gilid po ng message bar.*
         
 Kung magkamali naman, ay pindutin lamang po ang /clear upang hindi po mabilang sa maifo-forward ang mga larawan na hindi pa po nai-/nofollow.
 
@@ -450,8 +448,7 @@ Salamat po!
             current_photo_unique_id = update.message.photo[-1].file_unique_id
 
             if current_photo_unique_id in data.master_photo_unique_ids or current_title in data.group_titles_with_photo_unique_ids and current_photo_unique_id in data.group_titles_with_photo_unique_ids[current_title]:
-                message = "Duplicate has been found and ignored.\n"
-                message += f"File unique id: {current_photo_unique_id}"
+                message = f"Duplicate file unique id: {current_photo_unique_id}"
 
                 print(message)
 
