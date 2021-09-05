@@ -458,9 +458,13 @@ Salamat po!
                 if current_title in data.group_titles_with_duplicate_photo_unique_id_count:
                     data.group_titles_with_duplicate_photo_unique_id_count[current_title] += 1
 
+                    helper.save()
+
                     return
 
                 data.group_titles_with_duplicate_photo_unique_id_count[current_title] = 1
+
+                helper.save()
 
                 return
 
