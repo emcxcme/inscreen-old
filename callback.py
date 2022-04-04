@@ -10,7 +10,6 @@ from telegram.ext import Updater
 from telegram.files.inputmedia import InputMediaPhoto
 from telegram.keyboardbutton import KeyboardButton
 from telegram.replykeyboardmarkup import ReplyKeyboardMarkup
-import yaml
 
 
 class Callback:
@@ -37,7 +36,7 @@ class Callback:
         if current_id in self.group_ids:
             current_title = update.effective_chat.title
             keyboard = [
-                [KeyboardButton("/cfotoda"), KeyboardButton("/incfo")],
+                [KeyboardButton("/nofollow"), KeyboardButton("/info")],
                 [KeyboardButton("/clear"), KeyboardButton("/help")],
             ]
             markup = ReplyKeyboardMarkup(keyboard)
