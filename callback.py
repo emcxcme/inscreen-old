@@ -36,7 +36,7 @@ class Callback:
         if current_id in self.group_ids:
             current_title = update.effective_chat.title
             keyboard = [
-                [KeyboardButton("/cfotoda"), KeyboardButton("/incfotoday")],
+                [KeyboardButton("/cfotoda"), KeyboardButton("/incfo")],
                 [KeyboardButton("/clear"), KeyboardButton("/help")],
             ]
             markup = ReplyKeyboardMarkup(keyboard)
