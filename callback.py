@@ -36,21 +36,21 @@ class Callback:
         if current_id in self.group_ids:
             current_title = update.effective_chat.title
             keyboard = [
-                [KeyboardButton("/nofollow"), KeyboardButton("/info")],
-                [KeyboardButton("/clear"), KeyboardButton("/help")]
+                [KeyboardButton("/cfotoday"), KeyboardButton("/incfo")],
+                [KeyboardButton("/clear"), KeyboardButton("/help")],
             ]
             markup = ReplyKeyboardMarkup(keyboard)
 
             if current_title not in data.group_titles_with_photo_ids:
                 message = "Mag send po muna kayo ng picture."
 
-                context.bot.send_message(
-                    chat_id=current_id, text=message)
+                context.bot.send_message(chat_id=current_id, text=message)
 
                 message = "Ano pa pong maipaglilingkod ko?"
 
                 context.bot.send_message(
-                    chat_id=current_id, text=message, reply_markup=markup)
+                    chat_id=current_id, text=message, reply_markup=markup
+                )
                 time.sleep(constants.TIME_LIMIT * 2)
 
                 return
@@ -67,28 +67,35 @@ class Callback:
 
             photo_ids = []
             while len(data.group_titles_with_photo_ids[current_title]):
-                photo_ids += [
-                    data.group_titles_with_photo_ids[current_title].pop(0)]
+                photo_ids += [data.group_titles_with_photo_ids[current_title].pop(0)]
 
                 if len(photo_ids) == 10:
                     media_photos = list(map(InputMediaPhoto, photo_ids))
 
                     try:
-                        Updater(token=self.qm.get_available_bot_token()).bot.send_media_group(
-                            chat_id=self.target_group_id, media=media_photos)
+                        Updater(
+                            token=self.qm.get_available_bot_token()
+                        ).bot.send_media_group(
+                            chat_id=self.target_group_id, media=media_photos
+                        )
                         self.qm.dequeue()
 
                         if current_title not in data.master_group_titles_with_photo_ids:
-                            data.master_group_titles_with_photo_ids[current_title] = photo_ids
+                            data.master_group_titles_with_photo_ids[
+                                current_title
+                            ] = photo_ids
                         else:
-                            data.master_group_titles_with_photo_ids[current_title] += photo_ids
+                            data.master_group_titles_with_photo_ids[
+                                current_title
+                            ] += photo_ids
 
                         photo_ids = []
                     except BadRequest as e:
                         print(e)
 
                         data.group_titles_with_photo_ids[current_title].extend(
-                            photo_ids)
+                            photo_ids
+                        )
 
                         self.qm.dequeue()
 
@@ -98,14 +105,21 @@ class Callback:
                 media_photos = list(map(InputMediaPhoto, photo_ids))
 
                 try:
-                    Updater(token=self.qm.get_available_bot_token()).bot.send_media_group(
-                        chat_id=self.target_group_id, media=media_photos)
+                    Updater(
+                        token=self.qm.get_available_bot_token()
+                    ).bot.send_media_group(
+                        chat_id=self.target_group_id, media=media_photos
+                    )
                     self.qm.dequeue()
 
                     if current_title not in data.master_group_titles_with_photo_ids:
-                        data.master_group_titles_with_photo_ids[current_title] = photo_ids
+                        data.master_group_titles_with_photo_ids[
+                            current_title
+                        ] = photo_ids
                     else:
-                        data.master_group_titles_with_photo_ids[current_title] += photo_ids
+                        data.master_group_titles_with_photo_ids[
+                            current_title
+                        ] += photo_ids
 
                     photo_ids = []
                 except BadRequest as e:
@@ -119,24 +133,31 @@ class Callback:
 
             if current_title in data.group_titles_with_duplicate_photo_unique_id_count:
                 duplicate_count = data.group_titles_with_duplicate_photo_unique_id_count[
-                    current_title]
+                    current_title
+                ]
 
-                message += f"{duplicate_count} duplicate files were detected thus ignored!!!" if duplicate_count > 1 else f"{duplicate_count} duplicate file was detected thus ignored!!!"
+                message += (
+                    f"{duplicate_count} duplicate files were detected thus ignored!!!"
+                    if duplicate_count > 1
+                    else f"{duplicate_count} duplicate file was detected thus ignored!!!"
+                )
 
                 data.master_photo_unique_ids |= {
-                    *data.group_titles_with_photo_unique_ids[current_title]}
+                    *data.group_titles_with_photo_unique_ids[current_title]
+                }
 
                 data.group_titles_with_photo_unique_ids.pop(current_title)
                 data.group_titles_with_duplicate_photo_unique_id_count.pop(
-                    current_title)
+                    current_title
+                )
 
-            context.bot.send_message(
-                chat_id=current_id, text=message)
+            context.bot.send_message(chat_id=current_id, text=message)
 
             message = "Ano pa pong maipaglilingkod ko?"
 
             context.bot.send_message(
-                chat_id=current_id, text=message, reply_markup=markup)
+                chat_id=current_id, text=message, reply_markup=markup
+            )
             time.sleep(constants.TIME_LIMIT * 3)
 
             helper.save()
@@ -149,31 +170,33 @@ class Callback:
             return
 
         if current_id == self.target_group_id:
-            keyboard = [
-                [KeyboardButton("/info"), KeyboardButton("/clear")]
-            ]
+            keyboard = [[KeyboardButton("/info"), KeyboardButton("/clear")]]
             markup = ReplyKeyboardMarkup(keyboard)
 
             if len(data.master_group_titles_with_photo_ids) == 0:
                 message = "Wala pa pong nagpasa.\n"
 
-                context.bot.send_message(
-                    chat_id=current_id, text=message)
+                context.bot.send_message(chat_id=current_id, text=message)
 
                 message = "Ano pa pong maipaglilingkod ko?"
 
                 context.bot.send_message(
-                    chat_id=current_id, text=message, reply_markup=markup)
+                    chat_id=current_id, text=message, reply_markup=markup
+                )
                 time.sleep(constants.TIME_LIMIT * 2)
 
                 return
 
             if len(data.master_group_titles_with_photo_ids) != len(self.group_ids):
                 groups_with_no_photo_ids = sorted(
-                    set(constants.CONFIG.group_titles) - set(data.master_group_titles_with_photo_ids))
+                    set(constants.CONFIG.group_titles)
+                    - set(data.master_group_titles_with_photo_ids)
+                )
 
                 puroks_with_no_content = [
-                    "PUROK "+group.split("_")[-1]+"\n" for group in groups_with_no_photo_ids]
+                    "PUROK " + group.split("_")[-1] + "\n"
+                    for group in groups_with_no_photo_ids
+                ]
 
                 message = "Hindi pa po kompleto.\n\n"
                 message += "Mga hindi pa po nagpasa:\n"
@@ -191,8 +214,7 @@ class Callback:
             rankable = {}
             for purok in sorted(data.master_group_titles_with_photo_ids):
                 purok_number = int(purok.split("_")[2])
-                photo_count = len(
-                    data.master_group_titles_with_photo_ids[purok])
+                photo_count = len(data.master_group_titles_with_photo_ids[purok])
                 snumber_index = purok_number - 1
                 snumber = int(self.group_snumbers[snumber_index])
                 percentage = math.ceil((photo_count / snumber) * 100)
@@ -201,16 +223,17 @@ class Callback:
 
                 if percentage in rankable:
                     rankable[percentage] = [
-                        f"{rankable[percentage][0]} & {purok_number}", f"{rankable[percentage][1]} & {photo_count}"]
+                        f"{rankable[percentage][0]} & {purok_number}",
+                        f"{rankable[percentage][1]} & {photo_count}",
+                    ]
                 else:
                     rankable[percentage] = [purok, photo_count]
 
             total_photo_count = sum(
-                list(map(len, data.master_group_titles_with_photo_ids.values())))
-            total_snumber = sum(
-                list(map(int, self.group_snumbers)))
-            total_percentage = math.ceil(
-                (total_photo_count / total_snumber) * 100)
+                list(map(len, data.master_group_titles_with_photo_ids.values()))
+            )
+            total_snumber = sum(list(map(int, self.group_snumbers)))
+            total_percentage = math.ceil((total_photo_count / total_snumber) * 100)
 
             message += f"\nKabuuan = {total_percentage}% - {total_photo_count:,} views"
 
@@ -226,13 +249,13 @@ class Callback:
                 message += f"{rank_number}) PUROK {purok_number} - {percentage}% ({photo_count})\n"
             message += f"\nKabuuan = {total_percentage}% - {total_photo_count:,} views"
 
-            context.bot.send_message(
-                chat_id=current_id, text=message)
+            context.bot.send_message(chat_id=current_id, text=message)
 
             message = "Ano pa pong maipaglilingkod ko?"
 
             context.bot.send_message(
-                chat_id=current_id, text=message, reply_markup=markup)
+                chat_id=current_id, text=message, reply_markup=markup
+            )
             time.sleep(constants.TIME_LIMIT * 4)
 
             return
@@ -241,7 +264,7 @@ class Callback:
             current_title = update.effective_chat.title
             keyboard = [
                 [KeyboardButton("/nofollow"), KeyboardButton("/info")],
-                [KeyboardButton("/clear"), KeyboardButton("/help")]
+                [KeyboardButton("/clear"), KeyboardButton("/help")],
             ]
             markup = ReplyKeyboardMarkup(keyboard)
 
@@ -250,25 +273,35 @@ class Callback:
 
             message = time_template
             message += "Screenshot Summary:\n\n"
-            if current_title in data.group_titles_with_photo_ids and current_title in data.master_group_titles_with_photo_ids:
+            if (
+                current_title in data.group_titles_with_photo_ids
+                and current_title in data.master_group_titles_with_photo_ids
+            ):
                 message += "Meron na po kayong na i-send at na i-forward.\n\n"
-            if current_title not in data.group_titles_with_photo_ids and current_title not in data.master_group_titles_with_photo_ids:
+            if (
+                current_title not in data.group_titles_with_photo_ids
+                and current_title not in data.master_group_titles_with_photo_ids
+            ):
                 message += "Wala pa po kayong na i-send at na i-forward.\n\n"
-            if current_title in data.group_titles_with_photo_ids and current_title not in data.master_group_titles_with_photo_ids:
+            if (
+                current_title in data.group_titles_with_photo_ids
+                and current_title not in data.master_group_titles_with_photo_ids
+            ):
                 message += "Meron na po kayong na i-send, pero wala pa po kayong na i-forward.\n\n"
-            if current_title not in data.group_titles_with_photo_ids and current_title in data.master_group_titles_with_photo_ids:
+            if (
+                current_title not in data.group_titles_with_photo_ids
+                and current_title in data.master_group_titles_with_photo_ids
+            ):
                 message += "Wala pa po kayong na i-send, pero meron na po kayong na i-forward.\n\n"
 
             current_group_index = None
             if current_title:
-                current_group_index = self.group_titles.index(
-                    current_title)
+                current_group_index = self.group_titles.index(current_title)
             snumber = int(self.group_snumbers[current_group_index])
 
             photo_count = 0
             if current_title in data.group_titles_with_photo_ids:
-                photo_count = len(
-                    data.group_titles_with_photo_ids[current_title])
+                photo_count = len(data.group_titles_with_photo_ids[current_title])
                 percentage = math.ceil((photo_count / snumber) * 100)
 
                 message += f"Bilang ng na i-send: {photo_count}\nPorsyento ng na i-send: {percentage}%\n\n"
@@ -276,32 +309,39 @@ class Callback:
             master_photo_count = 0
             if current_title in data.master_group_titles_with_photo_ids:
                 master_photo_count = len(
-                    data.master_group_titles_with_photo_ids[current_title])
-                master_percentage = math.ceil(
-                    (master_photo_count / snumber) * 100)
+                    data.master_group_titles_with_photo_ids[current_title]
+                )
+                master_percentage = math.ceil((master_photo_count / snumber) * 100)
 
                 message += f"Bilang ng na i-forward: {master_photo_count}\nPorsyento ng na i-forward: {master_percentage}%\n\n"
 
             total_photo_count = photo_count + master_photo_count
-            total_percentage = math.ceil(
-                (total_photo_count / snumber) * 100)
+            total_percentage = math.ceil((total_photo_count / snumber) * 100)
 
-            if current_title in data.group_titles_with_photo_ids and current_title in data.master_group_titles_with_photo_ids:
+            if (
+                current_title in data.group_titles_with_photo_ids
+                and current_title in data.master_group_titles_with_photo_ids
+            ):
                 message += f"Kabuuang bilang: {total_photo_count}\nKabuuang porsyento: {total_percentage}%\n\n"
 
             if current_title in data.group_titles_with_duplicate_photo_unique_id_count:
                 duplicate_count = data.group_titles_with_duplicate_photo_unique_id_count[
-                    current_title]
+                    current_title
+                ]
 
-                message += f"{duplicate_count} duplicate files were detected thus ignored!!!" if duplicate_count > 1 else f"{duplicate_count} duplicate file was detected thus ignored!!!"
+                message += (
+                    f"{duplicate_count} duplicate files were detected thus ignored!!!"
+                    if duplicate_count > 1
+                    else f"{duplicate_count} duplicate file was detected thus ignored!!!"
+                )
 
-            context.bot.send_message(
-                chat_id=current_id, text=message)
+            context.bot.send_message(chat_id=current_id, text=message)
 
             message = "Ano pa pong maipaglilingkod ko?"
 
             context.bot.send_message(
-                chat_id=current_id, text=message, reply_markup=markup)
+                chat_id=current_id, text=message, reply_markup=markup
+            )
             time.sleep(constants.TIME_LIMIT * 2)
 
     def clear(self, update, context):
@@ -316,9 +356,7 @@ class Callback:
             return
 
         if current_id == self.target_group_id:
-            keyboard = [
-                [KeyboardButton("/info"), KeyboardButton("/clear")]
-            ]
+            keyboard = [[KeyboardButton("/info"), KeyboardButton("/clear")]]
             markup = ReplyKeyboardMarkup(keyboard)
 
             message = "Disabled."
@@ -330,13 +368,13 @@ class Callback:
 
             self.ismasterclearable = False
 
-            context.bot.send_message(
-                chat_id=current_id, text=message)
+            context.bot.send_message(chat_id=current_id, text=message)
 
             message = "Ano pa pong maipaglilingkod ko?"
 
             context.bot.send_message(
-                chat_id=current_id, text=message, reply_markup=markup)
+                chat_id=current_id, text=message, reply_markup=markup
+            )
             time.sleep(constants.TIME_LIMIT * 2)
 
             helper.save()
@@ -348,7 +386,7 @@ class Callback:
             message = ""
             keyboard = [
                 [KeyboardButton("/nofollow"), KeyboardButton("/info")],
-                [KeyboardButton("/clear"), KeyboardButton("/help")]
+                [KeyboardButton("/clear"), KeyboardButton("/help")],
             ]
             markup = ReplyKeyboardMarkup(keyboard)
 
@@ -357,7 +395,8 @@ class Callback:
 
             if current_title in data.group_titles_with_duplicate_photo_unique_id_count:
                 data.group_titles_with_duplicate_photo_unique_id_count.pop(
-                    current_title)
+                    current_title
+                )
 
             if current_title in data.group_titles_with_photo_ids:
                 data.group_titles_with_photo_ids.pop(current_title)
@@ -366,13 +405,13 @@ class Callback:
             else:
                 message += "Query is already empty."
 
-            context.bot.send_message(
-                chat_id=current_id, text=message)
+            context.bot.send_message(chat_id=current_id, text=message)
 
             message = "Ano pa pong maipaglilingkod ko?"
 
             context.bot.send_message(
-                chat_id=current_id, text=message, reply_markup=markup)
+                chat_id=current_id, text=message, reply_markup=markup
+            )
             time.sleep(constants.TIME_LIMIT * 2)
 
             helper.save()
@@ -418,17 +457,17 @@ Salamat po!
 """
             keyboard = [
                 [KeyboardButton("/nofollow"), KeyboardButton("/info")],
-                [KeyboardButton("/clear"), KeyboardButton("/help")]
+                [KeyboardButton("/clear"), KeyboardButton("/help")],
             ]
             markup = ReplyKeyboardMarkup(keyboard)
 
-            context.bot.send_message(
-                chat_id=current_id, text=message)
+            context.bot.send_message(chat_id=current_id, text=message)
 
             message = "Ano pa pong maipaglilingkod ko?"
 
             context.bot.send_message(
-                chat_id=current_id, text=message, reply_markup=markup)
+                chat_id=current_id, text=message, reply_markup=markup
+            )
             time.sleep(constants.TIME_LIMIT * 2)
 
     def received_photo(self, update, context):
@@ -447,19 +486,31 @@ Salamat po!
             current_photo_id = update.message.photo[-1].file_id
             current_photo_unique_id = update.message.photo[-1].file_unique_id
 
-            if current_photo_unique_id in data.master_photo_unique_ids or current_title in data.group_titles_with_photo_unique_ids and current_photo_unique_id in data.group_titles_with_photo_unique_ids[current_title]:
+            if (
+                current_photo_unique_id in data.master_photo_unique_ids
+                or current_title in data.group_titles_with_photo_unique_ids
+                and current_photo_unique_id
+                in data.group_titles_with_photo_unique_ids[current_title]
+            ):
                 message = f"Duplicate file unique id: {current_photo_unique_id}"
 
                 print(message)
 
-                if current_title in data.group_titles_with_duplicate_photo_unique_id_count:
-                    data.group_titles_with_duplicate_photo_unique_id_count[current_title] += 1
+                if (
+                    current_title
+                    in data.group_titles_with_duplicate_photo_unique_id_count
+                ):
+                    data.group_titles_with_duplicate_photo_unique_id_count[
+                        current_title
+                    ] += 1
 
                     helper.save()
 
                     return
 
-                data.group_titles_with_duplicate_photo_unique_id_count[current_title] = 1
+                data.group_titles_with_duplicate_photo_unique_id_count[
+                    current_title
+                ] = 1
 
                 helper.save()
 
@@ -467,20 +518,20 @@ Salamat po!
 
             if current_title in data.group_titles_with_photo_unique_ids:
                 data.group_titles_with_photo_unique_ids[current_title] += [
-                    current_photo_unique_id]
+                    current_photo_unique_id
+                ]
             else:
                 data.group_titles_with_photo_unique_ids[current_title] = [
-                    current_photo_unique_id]
+                    current_photo_unique_id
+                ]
 
             if current_title in data.group_titles_with_photo_ids:
-                data.group_titles_with_photo_ids[current_title] += [
-                    current_photo_id]
+                data.group_titles_with_photo_ids[current_title] += [current_photo_id]
 
                 helper.save()
 
                 return
 
-            data.group_titles_with_photo_ids[current_title] = [
-                current_photo_id]
+            data.group_titles_with_photo_ids[current_title] = [current_photo_id]
 
             helper.save()
