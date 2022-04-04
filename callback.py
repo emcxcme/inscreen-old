@@ -11,8 +11,6 @@ from telegram.files.inputmedia import InputMediaPhoto
 from telegram.keyboardbutton import KeyboardButton
 from telegram.replykeyboardmarkup import ReplyKeyboardMarkup
 import yaml
-# hello
-
 # hi
 
 
