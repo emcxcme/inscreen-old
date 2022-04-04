@@ -10,7 +10,6 @@ from telegram.ext import Updater
 from telegram.files.inputmedia import InputMediaPhoto
 from telegram.keyboardbutton import KeyboardButton
 from telegram.replykeyboardmarkup import ReplyKeyboardMarkup
-import yaml
 
 
 class Callback:
