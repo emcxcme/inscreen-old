@@ -1,11 +1,20 @@
 # import boto3
 import data
 import pickle
+
 # import secrets
 
 
 class Configuration:
-    def __init__(self, token, target_id, group_ids, group_descriptions, group_titles, group_snumbers):
+    def __init__(
+        self,
+        token,
+        target_id,
+        group_ids,
+        group_descriptions,
+        group_titles,
+        group_snumbers,
+    ):
         self.token = token
         self.target_id = target_id
         self.group_ids = group_ids
@@ -14,7 +23,7 @@ class Configuration:
         self.group_snumbers = group_snumbers
 
     def __str__(self):
-        return f"TOKEN: {self.token}\nTARGET_ID: {self.target_id}\nGROUP_IDS: {self.group_ids}\nGROUP_DESCRIPTIONS: {self.group_descriptions}\n"
+        return f"TOK: {self.token}\nTARGET_ID: {self.target_id}\nGROUP_IDS: {self.group_ids}\nGROUP_DESCRIPTIONS: {self.group_descriptions}\n"
 
 
 def parse_entries(config_name, entries):
@@ -40,18 +49,32 @@ def parse_config(filename):
     target_id = parse_entries("TARGET_ID", entries)
     group_ids = parse_entries("GROUP_IDS", entries)
     group_descriptions = parse_entries("GROUP_DESCRIPTIONS", entries)
-    group_titles = [group_description.split(
-        ":")[0] for group_description in group_descriptions]
-    group_snumbers = [group_description.split(
-        ":")[1] for group_description in group_descriptions]
+    group_titles = [
+        group_description.split(":")[0] for group_description in group_descriptions
+    ]
+    group_snumbers = [
+        group_description.split(":")[1] for group_description in group_descriptions
+    ]
 
-    return Configuration(token, target_id, group_ids, group_descriptions, group_titles, group_snumbers)
+    return Configuration(
+        token, target_id, group_ids, group_descriptions, group_titles, group_snumbers
+    )
 
 
 def save():
     with open("data.pkl", "wb") as file:
-        pickle.dump([data.master_group_titles_with_photo_ids, data.master_photo_unique_ids, data.group_titles_with_photo_ids,
-                    data.group_titles_with_photo_unique_ids, data.group_titles_with_duplicate_photo_unique_id_count], file, protocol=pickle.HIGHEST_PROTOCOL)
+        pickle.dump(
+            [
+                data.master_group_titles_with_photo_ids,
+                data.master_photo_unique_ids,
+                data.group_titles_with_photo_ids,
+                data.group_titles_with_photo_unique_ids,
+                data.group_titles_with_duplicate_photo_unique_id_count,
+            ],
+            file,
+            protocol=pickle.HIGHEST_PROTOCOL,
+        )
+
 
 # def save():
 #     client = boto3.client("s3", aws_access_key_id=secrets.access_key,
@@ -71,8 +94,14 @@ def save():
 
 def load():
     with open("data.pkl", "rb") as file:
-        data.master_group_titles_with_photo_ids, data.master_photo_unique_ids, data.group_titles_with_photo_ids, data.group_titles_with_photo_unique_ids, data.group_titles_with_duplicate_photo_unique_id_count = pickle.load(
-            file)
+        (
+            data.master_group_titles_with_photo_ids,
+            data.master_photo_unique_ids,
+            data.group_titles_with_photo_ids,
+            data.group_titles_with_photo_unique_ids,
+            data.group_titles_with_duplicate_photo_unique_id_count,
+        ) = pickle.load(file)
+
 
 # def load():
 #     client = boto3.client("s3", aws_access_key_id=secrets.access_key,
