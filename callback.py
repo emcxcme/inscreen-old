@@ -12,10 +12,6 @@ from telegram.keyboardbutton import KeyboardButton
 from telegram.replykeyboardmarkup import ReplyKeyboardMarkup
 import yaml
 
-# hi
-# hello
-# helloworld
-
 
 class Callback:
     def __init__(self, config):
