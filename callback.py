@@ -14,7 +14,11 @@ import yaml
 
 # hi
 # hello
+<<<<<<< HEAD
 # helloworld
+=======
+# what'sup
+>>>>>>> 29369162a7efbe16204d8a0bba34064893013612
 
 
 class Callback:
